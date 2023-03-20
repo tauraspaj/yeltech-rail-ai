@@ -1,6 +1,7 @@
-import requests
-from datetime import date, timedelta, datetime
+from datetime import date, timedelta
+
 import pandas as pd
+import requests
 
 
 def get_weather_api(lat=52.95624, lon=-1.18466, days_ahead=7):
