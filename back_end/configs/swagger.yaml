@@ -19,5 +19,21 @@ paths:
               message:
                 type: string
                 description: Message greeting.  
+  /get_predictions:
+    get:
+      operationId: app.flask.routes.run_predictions
+      summary: Runs the rail temperature forecasting algorithm
+      responses:
+        200:
+          description: Successful response.
+          schema:
+            type: array
+            items:
+              type: object
+              properties:
+                timestamp:
+                  type: string
+                reading:
+                  type: string
+            
 
-# definitions:

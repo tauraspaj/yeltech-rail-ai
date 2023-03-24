@@ -18,7 +18,7 @@ conda create -n yeltech-env python=3.10
    ```
 
 3. ```sh
-   docker run -p 8296:8296 yeltech-ai
+   docker run -it -p 8296:8296 yeltech-ai
    ```
 
 4. ```sh

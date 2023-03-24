@@ -12,7 +12,9 @@ def create_app():
         __name__, specification_dir=config.SPECIFICATION_DIR, options=options
     )
     CORS(app.app)
-    app.add_api("swagger.yaml", strict_validation=True, validate_responses=True)
+    app.add_api("swagger.yaml",
+                strict_validation=True,
+                validate_responses=True)
     error_handler.register_error_handlers(app)
     return app
 
