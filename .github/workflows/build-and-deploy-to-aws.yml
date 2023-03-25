@@ -20,7 +20,9 @@ jobs:
           key: ${{ secrets.SSH_PRIVATE_KEY }}
           port: 22
           script: |
-            cd /var/www/yeltech-rail-ai && sudo git reset --hard origin/main
+            cd /var/www/yeltech-rail-ai
+            sudo git pull
+            sudo git reset --hard origin/main
 
       - name: Create .env file
         uses: appleboy/ssh-action@master
@@ -31,12 +33,7 @@ jobs:
           port: 22
           script: |
             cd /var/www/yeltech-rail-ai
-            cat > .env << EOF
-            DB_USERNAME="${{ secrets.DB_USERNAME }}"
-            DB_PASSWORD="${{ secrets.DB_PASSWORD }}"
-            DB_ENDPOINT="${{ secrets.DB_ENDPOINT }}"
-            DB_PORT="${{ secrets.DB_PORT }}"
-            EOF
+            sudo echo "${{ secrets.ENV_FILE }}" | sudo tee .env
 
       - name: Stop active docker container
         uses: appleboy/ssh-action@master
