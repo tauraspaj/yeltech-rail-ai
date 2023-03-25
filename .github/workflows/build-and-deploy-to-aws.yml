@@ -31,9 +31,10 @@ jobs:
           username: ${{ secrets.SSH_USER }}
           key: ${{ secrets.SSH_PRIVATE_KEY }}
           port: 22
-          run: |
+          script: |
             cd /var/www/yeltech-rail-ai
-            sudo echo "${{ secrets.ENV_FILE }}" | sudo tee .env
+            sudo echo "${{ secrets.ENV_FILE }}" | sudo tee env.temp > /dev/null
+            sudo mv env.temp .env
 
       - name: Stop active docker container
         uses: appleboy/ssh-action@master
