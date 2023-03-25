@@ -11,41 +11,44 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v2
-
-      - name: Login to AWS
-        uses: aws-actions/configure-aws-credentials@v1
+      
+      - name: Execute git pull on the instance
+        uses: appleboy/ssh-action@master
         with:
-          aws-region: eu-west-2
-          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
-          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          host: ${{ secrets.SSH_HOST }}
+          username: ${{ secrets.SSH_USER }}
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          port: 22
+          script: |
+            cd /var/www/yeltech-rail-ai && sudo git reset --hard origin/main
 
-      - name: Install Lightsail CLI
-        run: |
-          sudo apt-get update
-          sudo apt-get install -y curl
-          curl "https://s3.us-west-2.amazonaws.com/lightsailctl/latest/linux-amd64/lightsailctl" -o "/usr/local/bin/lightsailctl"
-          sudo chmod +x /usr/local/bin/lightsailctl
+      - name: Stop active docker container
+        uses: appleboy/ssh-action@master
+        with:
+          host: ${{ secrets.SSH_HOST }}
+          username: ${{ secrets.SSH_USER }}
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          port: 22
+          script: |
+            if [ "$(docker ps -q)" ]; then sudo docker kill $(docker ps -q); fi
 
-      - name: Build Docker image
-        run: docker build -t yeltech-ai -f back_end/Dockerfile .
+      - name: Build docker image
+        uses: appleboy/ssh-action@master
+        with:
+          host: ${{ secrets.SSH_HOST }}
+          username: ${{ secrets.SSH_USER }}
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          port: 22
+          script: |
+            cd /var/www/yeltech-rail-ai
+            sudo docker build -t "yeltech-ai" -f back_end/Dockerfile .
 
-      - name: Push Docker image to AWS Lightsail
-        run: |
-          aws lightsail push-container-image --service-name yeltech-ai --label latest --image yeltech-ai:latest
-
-      - name: Deploy the latest changes
-        run: |
-          LATEST_IMAGE_NAME=$(aws lightsail get-container-images --service-name yeltech-ai --query 'containerImages[0].image' --output text)
-          aws lightsail create-container-service-deployment --service-name yeltech-ai --containers '{"yeltech-ai":{"image":"'"$LATEST_IMAGE_NAME"'","ports":{"8296":"HTTP"}}}' --public-endpoint '{"containerName":"yeltech-ai","containerPort":8296,"healthCheck":{"healthyThreshold":2,"unhealthyThreshold":2,"timeoutSeconds":2,"intervalSeconds":5,"path":"/","successCodes":"200-499"}}'
-
-      - name: Wait for deployment to finish
-        run: |
-          while true; do
-            DEPLOYMENT_STATUS=$(aws lightsail get-container-service-deployments --service-name yeltech-ai --query 'deployments[0].state' --output text)
-            if [ "$DEPLOYMENT_STATUS" == "ACTIVE" ]; then
-              break
-            elif [ "$DEPLOYMENT_STATUS" == "FAILED" ]; then
-              exit 1
-            fi
-            sleep 10
-          done
+      - name: Start docker container
+        uses: appleboy/ssh-action@master
+        with:
+          host: ${{ secrets.SSH_HOST }}
+          username: ${{ secrets.SSH_USER }}
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          port: 22
+          script: |
+            sudo docker run -it -p 8296:8296 -d yeltech-ai
