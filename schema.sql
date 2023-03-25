@@ -33,7 +33,7 @@ CREATE TABLE predictions (
 CREATE TABLE prediction_parameters (
     _parameter_id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY NOT NULL,
     parameter_name VARCHAR(255) NOT NULL,
-    unit VARCHAR(255) NOT NULL,
+    unit VARCHAR(255),
     param_provider VARCHAR(255) NOT NULL
 );
 
@@ -49,25 +49,23 @@ CREATE TABLE parameter_history (
 
 INSERT INTO prediction_parameters(parameter_name, unit, param_provider)
 VALUES
-    ('month', 'INT', 'Manual'),
-    ('day_of_year', 'INT', 'Manual'),
-    ('hour_of_day', 'INT', 'Manual'),
+    ('month', null, 'Manual'),
+    ('day_of_year', null, 'Manual'),
+    ('hour_of_day', null, 'Manual'),
     ('temperature_2m', 'C', 'Open-Meteo'),
     ('relativehumidity_2m', '%', 'Open-Meteo'),
     ('dewpoint_2m', 'C', 'Open-Meteo'),
     ('apparent_temperature', 'C', 'Open-Meteo'),
-    ('rain', 'mm', 'Open-Meteo'),
-    ('showers', 'mm', 'Open-Meteo'),
+    ('precipitation', 'mm', 'Open-Meteo'),
     ('cloudcover', '%', 'Open-Meteo'),
     ('cloudcover_low', '%', 'Open-Meteo'),
     ('cloudcover_mid', '%', 'Open-Meteo'),
     ('cloudcover_high', '%', 'Open-Meteo'),
     ('shortwave_radiation', 'w/m2', 'Open-Meteo'),
-    ('evapotranspiration', 'mm', 'Open-Meteo'),
     ('et0_fao_evapotranspiration', 'mm', 'Open-Meteo'),
     ('windspeed_10m', 'km/h', 'Open-Meteo'),
-    ('shortwave_radiation', 'w/m2', 'Open-Meteo'),
     ('direct_radiation', 'w/m2', 'Open-Meteo'),
     ('diffuse_radiation', 'w/m2', 'Open-Meteo'),
     ('direct_normal_irradiance', 'w/m2', 'Open-Meteo'),
-    ('terrestrial_radiation', 'w/m2', 'Open-Meteo');
+    ('azimuth', null, 'Open-Meteo'),
+    ('altitude', null, 'Open-Meteo');
