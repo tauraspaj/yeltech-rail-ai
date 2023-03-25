@@ -31,7 +31,7 @@ jobs:
           username: ${{ secrets.SSH_USER }}
           key: ${{ secrets.SSH_PRIVATE_KEY }}
           port: 22
-          script: |
+          run: |
             cd /var/www/yeltech-rail-ai
             sudo echo "${{ secrets.ENV_FILE }}" | sudo tee .env
 
@@ -44,6 +44,17 @@ jobs:
           port: 22
           script: |
             if [ "$(docker ps -q)" ]; then sudo docker kill $(docker ps -q); fi
+
+      - name: Sync models from S3 bucket
+        uses: appleboy/ssh-action@master
+        with:
+          host: ${{ secrets.SSH_HOST }}
+          username: ${{ secrets.SSH_USER }}
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          port: 22
+          script: |
+            cd /var/www/yeltech-rail-ai/assets/models/
+            sudo aws s3 sync s3://${{ secrets.BUCKET_NAME }}/models/ .
 
       - name: Build docker image
         uses: appleboy/ssh-action@master
