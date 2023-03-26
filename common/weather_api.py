@@ -1,14 +1,14 @@
 import pandas as pd
 import requests
-from dotenv import dotenv_values
 
-from common import sql, utils
+from common import utils
+from common.sql import PredParams, Devices
 
 
 class OpenMeteo:
     def __init__(self):
         self.base_url = 'https://api.open-meteo.com/v1/forecast?'
-        self.available_params = sql.PredParams().get_all_openmeteo_names()
+        self.available_params = PredParams().get_all_openmeteo_parameters()
 
     def generate_api_url(self, lat, lon, start_date, days_ahead):
         """Take a list of parameters and generate a full URL
@@ -37,7 +37,7 @@ class OpenMeteo:
         response = requests.get(api_url)
         return response.json()
 
-    def process_json_data(self, json_data):
+    def add_manual_fields(self, json_data):
         # Convert to pandas df
         json_df = pd.DataFrame(json_data['hourly'])
 
@@ -46,14 +46,21 @@ class OpenMeteo:
         json_df['month'] = json_df['time'].dt.month
         json_df['day_of_year'] = json_df['time'].dt.day_of_year
         json_df['hour_of_day'] = json_df['time'].dt.hour
+        json_df['azimuth'] = 0
+        json_df['altitude'] = 0
 
-        # Drop params that weren't used in the model
-        proc_data = json_df.copy(deep=True)
-        proc_data = proc_data.drop(columns=['time', 'precipitation'])
+        return json_df
 
-        return proc_data
+    def weather_pipe(self, device_id, start_date, days_ahead):
+        # Get device data to extract latitude and longitude
+        device_data = Devices().get_one(device_id)
 
-    def weather_pipe(self, lat, lon, start_date, days_ahead):
-        json_data = self.fetch_api_data(lat, lon, start_date, days_ahead)
-        proc_data = self.process_json_data(json_data)
-        return json_data, proc_data
+        # Get json data from the API
+        raw_json_data = self.fetch_api_data(
+            device_data['latitude'], device_data['longitude'],
+            start_date, days_ahead)
+
+        # Process API data to include extra fields
+        processed_data = self.add_manual_fields(raw_json_data)
+
+        return processed_data
