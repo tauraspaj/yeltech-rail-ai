@@ -1,58 +1,75 @@
-from datetime import date, timedelta
-
 import pandas as pd
 import requests
 
-
-def get_weather_api(lat=52.95624, lon=-1.18466, days_ahead=7):
-
-    # open-meteo
-    base_url = r'https://api.open-meteo.com/v1/forecast?'
-
-    lat = 'latitude=' + str(lat)
-    lon = '&longitude=' + str(lon)
-    start_date = '&start_date=' + str(date.today())
-    end_date = '&end_date=' + str(date.today() + timedelta(days=days_ahead))
-    params = '&hourly=temperature_2m,relativehumidity_2m,dewpoint_2m,' \
-        'precipitation,rain,snowfall,cloudcover,cloudcover_low,' \
-        'cloudcover_mid,cloudcover_high,shortwave_radiation,' \
-        'direct_radiation, diffuse_radiation,direct_normal_irradiance,' \
-        'windspeed_10m'
-
-    total_url = base_url + lat + lon + start_date + end_date + params
-
-    return total_url
+from common import utils
 
 
-def get_weather_data(total_url):
+class OpenMeteo:
+    def __init__(self):
+        self.base_url = 'https://api.open-meteo.com/v1/forecast?'
+        # ToDo: Extract this list from the database
+        self.available_params = [
+            'temperature_2m',
+            'relativehumidity_2m',
+            'dewpoint_2m',
+            'apparent_temperature',
+            'precipitation',
+            'cloudcover',
+            'cloudcover_low',
+            'cloudcover_mid',
+            'cloudcover_high',
+            'shortwave_radiation',
+            'et0_fao_evapotranspiration',
+            'windspeed_10m',
+            'direct_radiation',
+            'diffuse_radiation',
+            'direct_normal_irradiance'
+        ]
 
-    response = requests.get(total_url)
-    result = response.json()
+    def generate_api_url(self, lat, lon, start_date, days_ahead):
+        """Take a list of parameters and generate a full URL
 
-    raw_weather = pd.DataFrame(result['hourly'])
+        start-date must come in a format 'year-mm-dd'
+        e.g. '2023-03-25'
+        """
+        # Format latitude and longitude
+        lat_lon = f'latitude={lat}&longitude={lon}'
 
-    return raw_weather
+        # Format start and end date
+        start, end = utils.calculate_time_ahead(start_date, days_ahead)
+        start_end_dates = f'start_date={start}&end_date={end}'
 
+        # Format params
+        parameters = ','.join(self.available_params)
 
-def process_data(raw_weather):
+        api_url = f'{self.base_url}{lat_lon}&{start_end_dates}' \
+                  f'&hourly={parameters}'
 
-    # add time related features
-    raw_weather['time'] = pd.to_datetime(raw_weather['time'])
-    raw_weather['month'] = raw_weather['time'].dt.month
-    raw_weather['day_of_year'] = raw_weather['time'].dt.day_of_year
-    raw_weather['hour_of_day'] = raw_weather['time'].dt.hour
+        return api_url
 
-    # drop params that weren't used in the model
-    proc_weather = raw_weather.copy(deep=True)
-    proc_weather = proc_weather.drop(columns=['time', 'precipitation'])
+    def fetch_api_data(self, lat, lon, start_date, days_ahead):
+        """Fetch api data and return it as a json"""
+        api_url = self.generate_api_url(lat, lon, start_date, days_ahead)
+        response = requests.get(api_url)
+        return response.json()
 
-    return proc_weather
+    def process_json_data(self, json_data):
+        # Convert to pandas df
+        json_df = pd.DataFrame(json_data['hourly'])
 
+        # Add time related features
+        json_df['time'] = pd.to_datetime(json_df['time'])
+        json_df['month'] = json_df['time'].dt.month
+        json_df['day_of_year'] = json_df['time'].dt.day_of_year
+        json_df['hour_of_day'] = json_df['time'].dt.hour
 
-def weather_pipe():
+        # Drop params that weren't used in the model
+        proc_data = json_df.copy(deep=True)
+        proc_data = proc_data.drop(columns=['time', 'precipitation'])
 
-    total_url = get_weather_api()
-    raw_weather = get_weather_data(total_url)
-    proc_weather = process_data(raw_weather)
+        return proc_data
 
-    return raw_weather, proc_weather
+    def weather_pipe(self, lat, lon, start_date, days_ahead):
+        json_data = self.fetch_api_data(lat, lon, start_date, days_ahead)
+        proc_data = self.process_json_data(json_data)
+        return json_data, proc_data
