@@ -52,6 +52,8 @@ VALUES
     ('month', null, 'Manual'),
     ('day_of_year', null, 'Manual'),
     ('hour_of_day', null, 'Manual'),
+    ('azimuth', null, 'Manual'),
+    ('altitude', null, 'Manual'),
     ('temperature_2m', 'C', 'Open-Meteo'),
     ('relativehumidity_2m', '%', 'Open-Meteo'),
     ('dewpoint_2m', 'C', 'Open-Meteo'),
@@ -66,6 +68,4 @@ VALUES
     ('windspeed_10m', 'km/h', 'Open-Meteo'),
     ('direct_radiation', 'w/m2', 'Open-Meteo'),
     ('diffuse_radiation', 'w/m2', 'Open-Meteo'),
-    ('direct_normal_irradiance', 'w/m2', 'Open-Meteo'),
-    ('azimuth', null, 'Open-Meteo'),
-    ('altitude', null, 'Open-Meteo');
+    ('direct_normal_irradiance', 'w/m2', 'Open-Meteo');
