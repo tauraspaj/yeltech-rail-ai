@@ -1,30 +1,14 @@
 import pandas as pd
 import requests
+from dotenv import dotenv_values
 
-from common import utils
+from common import sql, utils
 
 
 class OpenMeteo:
     def __init__(self):
         self.base_url = 'https://api.open-meteo.com/v1/forecast?'
-        # ToDo: Extract this list from the database
-        self.available_params = [
-            'temperature_2m',
-            'relativehumidity_2m',
-            'dewpoint_2m',
-            'apparent_temperature',
-            'precipitation',
-            'cloudcover',
-            'cloudcover_low',
-            'cloudcover_mid',
-            'cloudcover_high',
-            'shortwave_radiation',
-            'et0_fao_evapotranspiration',
-            'windspeed_10m',
-            'direct_radiation',
-            'diffuse_radiation',
-            'direct_normal_irradiance'
-        ]
+        self.available_params = sql.PredParams().get_all_openmeteo_names()
 
     def generate_api_url(self, lat, lon, start_date, days_ahead):
         """Take a list of parameters and generate a full URL
