@@ -1,6 +1,7 @@
+import errno
 import os.path
 import pickle
-import errno
+from datetime import datetime, timedelta
 
 from .paths import ROOT_DIR
 
@@ -15,3 +16,9 @@ def load_model(model_name):
 
     model = pickle.load(open(model_path, 'rb'))
     return model
+
+
+def calculate_time_ahead(start_date, days_ahead):
+    start_date_object = datetime.strptime(start_date, '%Y-%m-%d').date()
+    end_date_object = start_date_object + timedelta(days=days_ahead)
+    return str(start_date_object), str(end_date_object)
