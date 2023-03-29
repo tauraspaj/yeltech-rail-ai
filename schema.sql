@@ -1,10 +1,12 @@
 CREATE DATABASE yeltech_ai_db;
 USE yeltech_ai_db;
 SET default_storage_engine=InnoDB;
+SET FOREIGN_KEY_CHECKS = 0;
 
 CREATE TABLE models (
     _model_id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY NOT NULL,
-    model_file_name VARCHAR(255) NOT NULL
+    model_file_name VARCHAR(255) NOT NULL,
+    param_provider VARCHAR(255) NOT NULL
 );
 
 CREATE TABLE prediction_parameters (
@@ -28,6 +30,7 @@ CREATE TABLE devices (
     prediction_status BOOLEAN DEFAULT 0 NOT NULL,
     latitude DECIMAL(10, 6),
     longitude DECIMAL(10, 6),
+    depo_location VARCHAR(255) NOT NULL,
     model_id INT UNSIGNED DEFAULT NULL,
     FOREIGN KEY (model_id) REFERENCES models(_model_id)
 );
@@ -47,7 +50,7 @@ CREATE TABLE predictions (
 
 CREATE TABLE parameter_history (
     _parameter_history_id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY NOT NULL,
-    parameter_value FLOAT DEFAULT NULL,
+    parameter_value VARCHAR(255) DEFAULT NULL,
     parameter_id INT UNSIGNED,
     prediction_id INT UNSIGNED,
     FOREIGN KEY (parameter_id) REFERENCES prediction_parameters(_parameter_id),
@@ -75,8 +78,10 @@ VALUES
     ('windspeed_10m', 'km/h', 'Open-Meteo'),
     ('direct_radiation', 'w/m2', 'Open-Meteo'),
     ('diffuse_radiation', 'w/m2', 'Open-Meteo'),
-    ('direct_normal_irradiance', 'w/m2', 'Open-Meteo');
+    ('direct_normal_irradiance', 'w/m2', 'Open-Meteo'),
+    ('depo_location', null, 'Manual');
 
-INSERT INTO devices(device_name, prediction_status, latitude, longitude, model_id) VALUES ('TEST RTMU', 1, 51.5072, 0.1276, 1);
-INSERT INTO model_parameters(model_id, prediction_parameter_id) 
-	(1, 1), (1,2), (1,3), (1,4), (1,5), (1,6), (1,7), (1,8), (1,9), (1,10), (1,11), (1,12), (1, 13), (1,14), (1,15), (1,16), (1,17), (1,18), (1,19), (1,20);
+INSERT INTO models(model_file_name, param_provider) VALUES ('baseline_depo_model.pkl', 'Open-Meteo');
+INSERT INTO devices(device_name, prediction_status, latitude, longitude, model_id, depo_location) VALUES ('TEST RTMU', 1, 51.5072, 0.1276, 1, 'Nottingham');
+INSERT INTO model_parameters(model_id, prediction_parameter_id) VALUES
+	(1, 1), (1,2), (1,3), (1,4), (1,5), (1,6), (1,7), (1,8), (1,9), (1,10), (1,11), (1,12), (1, 13), (1,14), (1,15), (1,16), (1,17), (1,18), (1,19), (1,20), (1,21);
