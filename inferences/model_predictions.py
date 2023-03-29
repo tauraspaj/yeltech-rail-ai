@@ -1,8 +1,9 @@
 import json
+from datetime import datetime
 
 import pandas as pd
 
-from common.sql import Models, Devices
+from common.sql import Devices, Models, save_predictions_to_db
 from common.utils import load_model
 from common.weather_api import OpenMeteo
 
@@ -20,8 +21,16 @@ def prediction_pipeline(device_id, start_date, days_ahead):
     # Get raw data and append required fields. This will return pandas df
     all_data = OpenMeteo().weather_pipe(device_id, start_date, days_ahead)
 
+    # Get current time as time_of_execution
+    time_of_execution = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+
     # Execute the prediction
-    execute_prediction(model, all_data, model_params)
+    predictions = execute_prediction(model, all_data, model_params)
+
+    # Save predictions and data to the database
+    save_predictions_to_db(predictions, all_data, time_of_execution, device_id)
+
+    return
 
 
 def execute_prediction(model, all_data, model_params):
@@ -37,6 +46,7 @@ def execute_prediction(model, all_data, model_params):
 
     # Convert predictions array into a df
     df_predictions = pd.DataFrame(predictions, columns=['predicted_temp'])
+
     # Append a time to each prediction
     df_result = pd.concat([df_predictions, all_data[['time']]], axis=1)
     df_result['time'] = pd.DatetimeIndex(df_result['time'].values)
