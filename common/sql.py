@@ -175,7 +175,7 @@ def save_predictions_to_db(predictions, all_data,
             'Manual'
         )
     )
-    param_dict = provider_dict | manual_params
+    param_dict = {**provider_dict, **manual_params}
     # Add to parameter_history table
     parameter_history_table_sql = '''
         INSERT INTO parameter_history (parameter_value, parameter_id,
