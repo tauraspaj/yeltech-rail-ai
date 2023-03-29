@@ -91,3 +91,4 @@ INSERT INTO model_parameters(model_id, prediction_parameter_id) VALUES
 
 INSERT INTO devices(device_name, prediction_status, latitude, longitude, model_id, depo_location) VALUES ('RTMU 3280', 1, 50.875246, -1.264611, 1, 'Eastleigh');
 INSERT INTO devices(device_name, prediction_status, latitude, longitude, model_id, depo_location) VALUES ('RTMU 2716', 1, 52.956240, -1.184660, 1, 'Nottingham');
+INSERT INTO devices(device_name, prediction_status, latitude, longitude, model_id, depo_location) VALUES ('TEST RTMU', 1, 52.956240, -1.184660, 1, 'Nottingham');
