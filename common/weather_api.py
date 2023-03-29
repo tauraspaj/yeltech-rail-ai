@@ -2,13 +2,17 @@ import pandas as pd
 import requests
 
 from common import utils
-from common.sql import PredParams, Devices
+from common.sql import Devices, PredParams
 
 
 class OpenMeteo:
     def __init__(self):
         self.base_url = 'https://api.open-meteo.com/v1/forecast?'
-        self.available_params = PredParams().get_all_openmeteo_parameters()
+        open_meteo_params = PredParams().get_all_provider_parameters(
+            'Open-Meteo')
+        self.available_params = [
+            p['parameter_name'] for p in open_meteo_params
+        ]
 
     def generate_api_url(self, lat, lon, start_date, days_ahead):
         """Take a list of parameters and generate a full URL
@@ -37,7 +41,7 @@ class OpenMeteo:
         response = requests.get(api_url)
         return response.json()
 
-    def add_manual_fields(self, json_data):
+    def add_manual_fields(self, json_data, device_data):
         # Convert to pandas df
         json_df = pd.DataFrame(json_data['hourly'])
 
@@ -48,6 +52,10 @@ class OpenMeteo:
         json_df['hour_of_day'] = json_df['time'].dt.hour
         json_df['azimuth'] = 0
         json_df['altitude'] = 0
+
+        # Add depot
+        json_df['depo_location'] = device_data['depo_location']
+        json_df['depo_location'] = json_df['depo_location'].astype('category')
 
         return json_df
 
@@ -61,6 +69,6 @@ class OpenMeteo:
             start_date, days_ahead)
 
         # Process API data to include extra fields
-        processed_data = self.add_manual_fields(raw_json_data)
+        processed_data = self.add_manual_fields(raw_json_data, device_data)
 
         return processed_data
