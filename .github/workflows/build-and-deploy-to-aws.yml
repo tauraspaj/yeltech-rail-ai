@@ -76,4 +76,4 @@ jobs:
           key: ${{ secrets.SSH_PRIVATE_KEY }}
           port: 22
           script: |
-            sudo docker run -it -p 8296:8296 -d yeltech-ai
+            sudo docker run -it -p 8296:8296 --env-file /var/www/yeltech-rail-ai/.env -d yeltech-ai
