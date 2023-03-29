@@ -1,10 +1,13 @@
+import os
+
 import mysql.connector
 import pandas as pd
-from dotenv import dotenv_values
+from dotenv import load_dotenv
 
 from common import utils
 
-ENV = dotenv_values(".env")
+# Load env variables
+load_dotenv()
 
 
 class Sql:
@@ -14,9 +17,9 @@ class Sql:
 
     def __open_connection(self):
         try:
-            return mysql.connector.connect(host=ENV['DB_ENDPOINT'],
-                                           user=ENV['DB_USERNAME'],
-                                           password=ENV['DB_PASSWORD'],
+            return mysql.connector.connect(host=os.getenv('DB_ENDPOINT'),
+                                           user=os.getenv('DB_USERNAME'),
+                                           password=os.getenv('DB_PASSWORD'),
                                            database='yeltech_ai_db')
         except mysql.connector.Error as error:
             raise Exception(f'Unable to connect to the database: {error}')
