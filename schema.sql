@@ -82,6 +82,12 @@ VALUES
     ('depo_location', null, 'Manual');
 
 INSERT INTO models(model_file_name, param_provider) VALUES ('baseline_depo_model.pkl', 'Open-Meteo');
-INSERT INTO devices(device_name, prediction_status, latitude, longitude, model_id, depo_location) VALUES ('TEST RTMU', 1, 51.5072, 0.1276, 1, 'Nottingham');
+INSERT INTO models(model_file_name, param_provider) VALUES ('baseline_global_model.pkl', 'Open-Meteo');
+
 INSERT INTO model_parameters(model_id, prediction_parameter_id) VALUES
 	(1, 1), (1,2), (1,3), (1,4), (1,5), (1,6), (1,7), (1,8), (1,9), (1,10), (1,11), (1,12), (1, 13), (1,14), (1,15), (1,16), (1,17), (1,18), (1,19), (1,20), (1,21);
+INSERT INTO model_parameters(model_id, prediction_parameter_id) VALUES
+	(2, 1), (2,2), (2,3), (2,4), (2,5), (2,6), (2,7), (2,8), (2,9), (2,10), (2,11), (2,12), (2, 13), (2,14), (2,15), (2,16), (2,17), (2,18), (2,19), (2,20);
+
+INSERT INTO devices(device_name, prediction_status, latitude, longitude, model_id, depo_location) VALUES ('RTMU 3280', 1, 50.875246, -1.264611, 1, 'Eastleigh');
+INSERT INTO devices(device_name, prediction_status, latitude, longitude, model_id, depo_location) VALUES ('RTMU 2716', 1, 52.956240, -1.184660, 1, 'Nottingham');
