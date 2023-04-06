@@ -1,7 +1,7 @@
 FROM python:3.10
 
 RUN apt-get update
-RUN apt-get install ffmpeg libsm6 libxext6  -y
+RUN apt-get install ffmpeg libsm6 libxext6 -y
 
 WORKDIR /back_end
 
@@ -13,10 +13,12 @@ ENV PYTHONPATH "${PYTHONPATH}:/back_end/"
 
 COPY back_end .
 
+RUN mkdir /back_end/logs
+
 COPY common /back_end/common
 COPY inferences /back_end/inferences
 COPY assets /back_end/assets
 
 EXPOSE 8296
 
-ENTRYPOINT ["gunicorn", "--log-level", "INFO", "-b", ":8296", "-t", "120", "run:APP"]
+ENTRYPOINT ["gunicorn", "-c", "python:configs.gunicorn", "run:app"]
