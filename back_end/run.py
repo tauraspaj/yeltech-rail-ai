@@ -1,16 +1,10 @@
-import logging
-import os
+from common import logger
 
 from app import flask
 
-APP = flask.create_app()
+app = flask.create_app()
+log = logger.setup_logger()
 
 if __name__ == "__main__":
-    logging.basicConfig(level=logging.INFO)
-    logging.info("Starting API...")
-    APP.run(
-        host="0.0.0.0",
-        port=os.environ.get("PORT", 8080),
-        debug=True,
-        use_reloader=True,
-    )
+    log.info("Starting API...")
+    app.run()
