@@ -2,7 +2,7 @@
 
 # Load environment variables from .env file
 set -o allexport
-source .env
+source "$(dirname "$0")/.env"
 set +o allexport
 
 # Connect to MySQL database
