@@ -5,7 +5,7 @@ from common import paths
 
 
 def setup_logger():
-    logger = logging.getLogger(__name__)
+    logger = logging.getLogger("root")
     logger.setLevel(logging.INFO)
 
     formatter = logging.Formatter(
@@ -18,12 +18,18 @@ def setup_logger():
 
     file_handler = logging.FileHandler(
         os.path.join(path_to_logs, 'history.log'),
-        mode='a'
-    )
+        mode='a')
 
     file_handler.setLevel(logging.INFO)
     file_handler.setFormatter(formatter)
 
     logger.addHandler(file_handler)
 
+    return logger
+
+
+def get_logger():
+    logger = logging.getLogger("root")
+    if not logger.hasHandlers():
+        logger = setup_logger()
     return logger
