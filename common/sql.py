@@ -4,9 +4,9 @@ import mysql.connector
 import pandas as pd
 from dotenv import load_dotenv
 
-from common import utils
+from common import logger, utils
 
-# Load env variables
+log = logger.get_logger()
 load_dotenv()
 
 
@@ -32,12 +32,15 @@ class Sql:
         self._cursor.execute(query)
         return self._cursor.fetchall()
 
-    def execute_query(self, query,):
+    def execute_query(self, query):
         self._cursor.execute(query)
         return self._cursor.fetchall()
 
-    def insert_query(self, query, values):
-        self._cursor.execute(query, values)
+    def insert_query(self, query, values=None):
+        if values:
+            self._cursor.execute(query, values)
+        else:
+            self._cursor.execute(query)
         self.conn.commit()
         return self._cursor.lastrowid
 
@@ -142,27 +145,40 @@ def save_predictions_to_db(predictions, all_data,
     predictions_df = pd.DataFrame(predictions)
     predictions_df = predictions_df.rename(columns={'timestamp': 'time'})
     predictions_df['time'] = pd.to_datetime(predictions_df['time'])
-    print(f"[DiD: {device_id}] Inserting predictions to database. \
-          Shape {predictions_df.shape}")
-    new_prediction_rows = []
-    for index, row in predictions_df.iterrows():
-        predictions_table_sql = '''
-            INSERT INTO predictions (time_of_execution, prediction,
-            prediction_timestamp, latitude, longitude, model_id, device_id)
-            VALUES (%s, %s, %s, %s, %s, %s, %s)
-            '''
-        values = (time_of_execution, float(row['reading']), row['time'],
-                  device_data['latitude'], device_data['longitude'],
-                  device_data['model_id'], device_id)
 
-        # Execute the INSERT statement
-        new_row_id = Sql().insert_query(predictions_table_sql, values)
+    log.info(
+        "[DiD %d] Attempting to insert predictions to database. "
+        "Shape %s", device_id, predictions_df.shape)
 
-        # Collect the new row id that will be used for parameter history
-        new_prediction_rows.append({
-            'time': row['time'],
-            'new_prediction_row_id': new_row_id
-        })
+    try:
+        new_prediction_rows = []
+        for _, row in predictions_df.iterrows():
+            predictions_table_sql = '''
+                INSERT INTO predictions (time_of_execution, prediction,
+                prediction_timestamp, latitude, longitude, model_id, device_id)
+                VALUES (%s, %s, %s, %s, %s, %s, %s)
+                '''
+            values = (
+                time_of_execution, float(row['reading']), row['time'],
+                device_data['latitude'], device_data['longitude'],
+                device_data['model_id'], device_id
+            )
+
+            # Execute the INSERT statement
+            new_row_id = Sql().insert_query(predictions_table_sql, values)
+
+            # Collect the new row id that will be used for parameter history
+            new_prediction_rows.append({
+                'time': row['time'],
+                'new_prediction_row_id': new_row_id
+            })
+
+        log.info("Predictions saved successfully.")
+    except Exception as e:
+        log.error(
+            "Failed to save predictions to database. "
+            "Ending process. Error: %s", e)
+        return
 
     # Find param ids
     provider_dict = utils.convert_model_param_list_to_dict(
@@ -175,18 +191,46 @@ def save_predictions_to_db(predictions, all_data,
             'Manual'
         )
     )
+    # Join param dicts
     param_dict = {**provider_dict, **manual_params}
+
+    log.info(
+        "[DiD %d] Attempting to insert parameter history to database. "
+        "Shape %s", device_id, all_data.shape)
+
+    insert_parameter_history_data(all_data, param_dict, new_prediction_rows)
+
+    return
+
+
+def insert_parameter_history_data(all_data, param_dict, new_prediction_rows):
+    prediction_ids_df = pd.DataFrame(new_prediction_rows)
+
     # Add to parameter_history table
     parameter_history_table_sql = '''
         INSERT INTO parameter_history (parameter_value, parameter_id,
         prediction_id)
-        VALUES (%s, %s, %s)
+        VALUES
         '''
-    print(f"[DiD: {device_id}] Inserting parameter history to database. \
-          Shape {all_data.shape}")
-    for index, row in all_data.iterrows():
+
+    for _, row in all_data.iterrows():
+        time = row.loc['time']
+        prediction_id = prediction_ids_df.loc[
+            prediction_ids_df['time'] == time, 'new_prediction_row_id'].item()
+
         for column_name, cell_value in row.items():
             if column_name != 'time':
-                values = (cell_value, param_dict[column_name], new_row_id)
-                Sql().insert_query(parameter_history_table_sql, values)
+                values = (cell_value, param_dict[column_name], prediction_id)
+                parameter_history_table_sql += f"{str(values)},"
+
+    # Delete the last comma
+    parameter_history_table_sql = parameter_history_table_sql[:-1]
+    try:
+        Sql().insert_query(parameter_history_table_sql)
+        log.info("Parameter history saved successfully.")
+    except Exception as e:
+        log.error(
+            "Failed to save parameter history to database. "
+            "Ending process. Error: %s", e)
+        return
     return
