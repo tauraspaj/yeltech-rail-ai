@@ -3,32 +3,67 @@ from datetime import datetime
 
 import pandas as pd
 
+from common import logger
 from common.sql import Devices, Models, save_predictions_to_db
 from common.utils import load_model
 from common.weather_api import OpenMeteo
 
+log = logger.get_logger()
+
 
 def prediction_pipeline(device_id, start_date, days_ahead):
     # Find model is used by device
-    model_id = Devices().get_one(device_id)['model_id']
-
-    # Retrieve the model
-    model = load_model(model_id)
+    try:
+        model_id = Devices().get_one(device_id)['model_id']
+        # Retrieve the model
+        model = load_model(model_id)
+    except Exception as e:
+        log.error(
+            "[DiD: %d] Failed to load the model. Ending process. "
+            "Error: %s", device_id, e)
+        return
 
     # Get a list of params that the model was trained on
-    model_params = Models().get_model_parameters(model_id)
+    try:
+        model_params = Models().get_model_parameters(model_id)
+    except Exception as e:
+        log.error(
+            "[DiD: %d] Failed to get model params. Ending process. "
+            "Error: %s", device_id, e)
+        return
 
     # Get raw data and append required fields. This will return pandas df
-    all_data = OpenMeteo().weather_pipe(device_id, start_date, days_ahead)
+    try:
+        all_data = OpenMeteo().weather_pipe(device_id, start_date, days_ahead)
+    except Exception as e:
+        log.error(
+            "[DiD: %d] Failed to get weather data. Ending process. "
+            "Error: %s", device_id, e)
+        return
 
     # Get current time as time_of_execution
     time_of_execution = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
 
     # Execute the prediction
-    predictions = execute_prediction(model, all_data, model_params)
+    try:
+        predictions = execute_prediction(model, all_data, model_params)
+    except Exception as e:
+        log.error(
+            "[DiD: %d] Failed to execute predictions. Ending process. "
+            "Error: %s", device_id, e)
+        return
 
     # Save predictions and data to the database
-    save_predictions_to_db(predictions, all_data, time_of_execution, device_id)
+    try:
+        save_predictions_to_db(predictions,
+                               all_data,
+                               time_of_execution,
+                               device_id)
+    except Exception as e:
+        log.error(
+            "[DiD: %d] Failed to save predictions to database. "
+            "Ending process. Error: %s", device_id, e)
+        return
 
     return
 
