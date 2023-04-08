@@ -9,7 +9,7 @@ def setup_logger():
     logger.setLevel(logging.INFO)
 
     formatter = logging.Formatter(
-        '%(asctime)s - %(filename)s - %(levelname)s - %(message)s'
+        '%(asctime)s -  %(levelname)s - %(filename)s - %(message)s'
     )
 
     path_to_logs = os.path.join(paths.ROOT_DIR, 'logs')
