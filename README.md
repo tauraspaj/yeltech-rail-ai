@@ -23,3 +23,9 @@ conda create -n yeltech-env python=3.10
 
 4. ```sh
    streamlit run main.py
+
+## FAQ
+1. If imports are not being found, project has to be added to PYTHONPATH (Windows):
+```sh
+setx PYTHONPATH=path\to\project\yeltech-rail-ai;%PYTHONPATH%
+```

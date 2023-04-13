@@ -1,5 +1,5 @@
-from .common import weather_api
-from .inferences import model_predictions
+from common import weather_api
+from inferences import model_predictions
 
 
 def get_predictions():
