@@ -46,7 +46,9 @@ def prediction_pipeline(device_id, start_date, days_ahead):
 
     # Execute the prediction
     try:
-        predictions = execute_prediction(model, all_data, model_params)
+        if not (predictions := execute_prediction(
+                model, all_data, model_params)):
+            return
     except Exception as e:
         log.error(
             "[DiD: %d] Failed to execute predictions. Ending process. "
@@ -55,10 +57,8 @@ def prediction_pipeline(device_id, start_date, days_ahead):
 
     # Save predictions and data to the database
     try:
-        save_predictions_to_db(predictions,
-                               all_data,
-                               time_of_execution,
-                               device_id)
+        save_predictions_to_db(
+            predictions, all_data, time_of_execution, device_id)
     except Exception as e:
         log.error(
             "[DiD: %d] Failed to save predictions to database. "
@@ -73,7 +73,16 @@ def execute_prediction(model, all_data, model_params):
     filtered_df = all_data.filter(model_params)
 
     # Reorder the columns so they're acceptable by the model
-    cols_when_model_builds = model.get_booster().feature_names
+    try:
+        cols_when_model_builds = model.get_booster().feature_names
+    except AttributeError:
+        try:
+            cols_when_model_builds = model.feature_name_
+        except Exception as e:
+            log.error(
+                "Unable to re-order columns to match the model. "
+                "Ending process. Error: %s", e)
+            return
     filtered_df = filtered_df[cols_when_model_builds]
 
     # Get predictions
