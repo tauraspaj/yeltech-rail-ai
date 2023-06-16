@@ -1,1 +1,1 @@
-*/30 * * * * cd . ./back_end/.env && export PYTHONPATH=$PYTHONPATH:/back_end/ && /usr/local/bin/python /back_end/inferences/prediction_automation.py >> /back_end/logs/history.log 2>&1
+0 8 * * * cd . ./back_end/.env && export PYTHONPATH=$PYTHONPATH:/back_end/ && /usr/local/bin/python /back_end/inferences/prediction_automation.py >> /back_end/logs/history.log 2>&1
