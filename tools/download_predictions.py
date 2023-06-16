@@ -1,6 +1,9 @@
 import csv
 import os
 import mysql.connector
+from dotenv import load_dotenv
+
+load_dotenv()
 
 # connect to the database
 db_connection = mysql.connector.connect(
