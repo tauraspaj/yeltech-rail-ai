@@ -21,6 +21,6 @@ cursor.execute(query)
 results = cursor.fetchall()
 
 # save results to a csv
-with open("predictions.csv", "w") as f:
+with open("tmp_prediction_analysis.csv", "w") as f:
     writer = csv.writer(f)
     writer.writerows(results)
