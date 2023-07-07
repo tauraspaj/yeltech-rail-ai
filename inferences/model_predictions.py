@@ -6,7 +6,7 @@ import pandas as pd
 from common import logger
 from common.sql import Devices, Models, save_predictions_to_db
 from common.utils import load_model
-from common.weather_api import OpenMeteo
+from common.weather_api import OpenMeteo, VisualCrossing
 
 log = logger.get_logger()
 
@@ -34,7 +34,9 @@ def prediction_pipeline(device_id, start_date, days_ahead):
 
     # Get raw data and append required fields. This will return pandas df
     try:
-        all_data = OpenMeteo().weather_pipe(device_id, start_date, days_ahead)
+        all_data = VisualCrossing().weather_pipe(
+            device_id, start_date, days_ahead
+        )
     except Exception as e:
         log.error(
             "[DiD: %d] Failed to get weather data. Ending process. "

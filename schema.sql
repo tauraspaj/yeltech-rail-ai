@@ -57,70 +57,45 @@ CREATE TABLE parameter_history (
     FOREIGN KEY (prediction_id) REFERENCES predictions(_prediction_id)
 );
 
-INSERT INTO prediction_parameters(parameter_name, unit, param_provider)
+INSERT INTO prediction_parameters(_parameter_id, parameter_name, unit, param_provider)
 VALUES
-    ('month', null, 'Manual'),
-    ('day_of_year', null, 'Manual'),
-    ('hour_of_day', null, 'Manual'),
-    ('azimuth', null, 'Manual'),
-    ('altitude', null, 'Manual'),
-    ('temperature_2m', 'C', 'Open-Meteo'),
-    ('relativehumidity_2m', '%', 'Open-Meteo'),
-    ('dewpoint_2m', 'C', 'Open-Meteo'),
-    ('apparent_temperature', 'C', 'Open-Meteo'),
-    ('precipitation', 'mm', 'Open-Meteo'),
-    ('cloudcover', '%', 'Open-Meteo'),
-    ('cloudcover_low', '%', 'Open-Meteo'),
-    ('cloudcover_mid', '%', 'Open-Meteo'),
-    ('cloudcover_high', '%', 'Open-Meteo'),
-    ('shortwave_radiation', 'w/m2', 'Open-Meteo'),
-    ('et0_fao_evapotranspiration', 'mm', 'Open-Meteo'),
-    ('windspeed_10m', 'km/h', 'Open-Meteo'),
-    ('direct_radiation', 'w/m2', 'Open-Meteo'),
-    ('diffuse_radiation', 'w/m2', 'Open-Meteo'),
-    ('direct_normal_irradiance', 'w/m2', 'Open-Meteo'),
-    ('depo_location', null, 'Manual');
+    (1, 'depo_location', null, 'Manual'),
+    (2, 'device_name', null, 'Manual'),
+    (3, 'month', null, 'Manual'),
+    (4, 'day_of_year', null, 'Manual'),
+    (5, 'hour_of_day', null, 'Manual'),
+    (6, 'datetime', null, 'Visual-Crossing'),
+    (7, 'temp', 'C', 'Visual-Crossing'),
+    (8, 'dew', 'C', 'Visual-Crossing'),
+    (9, 'humidity', '%', 'Visual-Crossing'),
+    (10, 'precip', 'mm', 'Visual-Crossing'),
+    (11, 'visibility', '%', 'Visual-Crossing'),
+    (12, 'solarradiation', 'W/m2', 'Visual-Crossing'),
+    (13, 'solarenergy', 'Wh', 'Visual-Crossing');
 
-INSERT INTO models(model_file_name, param_provider) VALUES ('baseline_global_lgbm_mean_model.pkl', 'Open-Meteo');
-INSERT INTO models(model_file_name, param_provider) VALUES ('baseline_global_lgbm_95q_model.pkl', 'Open-Meteo');
-INSERT INTO models(model_file_name, param_provider) VALUES ('baseline_global_lgbm_5q_model.pkl', 'Open-Meteo');
-INSERT INTO models(model_file_name, param_provider) VALUES ('baseline_global_lgbm_50q_model.pkl', 'Open-Meteo');
+INSERT INTO models(model_file_name, param_provider) VALUES ('baseline_sensor_vc_cleaned_model.pkl', 'Visual-Crossing');
+INSERT INTO models(model_file_name, param_provider) VALUES ('baseline_sensor_vc_model.pkl', 'Visual-Crossing');
 
 INSERT INTO model_parameters(model_id, prediction_parameter_id) VALUES
-	(1, 1), (1,2), (1,3), (1,4), (1,5), (1,6), (1,7), (1,8), (1,9), (1,10), (1,11), (1,12), (1, 13), (1,14), (1,15), (1,16), (1,17), (1,18), (1,19), (1,20), (1,21);
+	(1, 1), (1,2), (1,3), (1,4), (1,5), (1,6), (1,7), (1,8), (1,9), (1,10), (1,11), (1,12), (1, 13);
 INSERT INTO model_parameters(model_id, prediction_parameter_id) VALUES
-	(2, 1), (2,2), (2,3), (2,4), (2,5), (2,6), (2,7), (2,8), (2,9), (2,10), (2,11), (2,12), (2, 13), (2,14), (2,15), (2,16), (2,17), (2,18), (2,19), (2,20);
-INSERT INTO model_parameters(model_id, prediction_parameter_id) VALUES
-	(3, 1), (3,2), (3,3), (3,4), (3,5), (3,6), (3,7), (3,8), (3,9), (3,10), (3,11), (3,12), (3, 13), (3,14), (3,15), (3,16), (3,17), (3,18), (3,19), (3,20);
-INSERT INTO model_parameters(model_id, prediction_parameter_id) VALUES
-	(4, 1), (4,2), (4,3), (4,4), (4,5), (4,6), (4,7), (4,8), (4,9), (4,10), (4,11), (4,12), (4, 13), (4,14), (4,15), (4,16), (4,17), (4,18), (4,19), (4,20);
+	(2, 1), (2,2), (2,3), (2,4), (2,5), (2,6), (2,7), (2,8), (2,9), (2,10), (2,11), (2,12), (2, 13);
+
 
 INSERT INTO devices(device_name, prediction_status, latitude, longitude, model_id, depo_location) VALUES ('RTMU 2941', 1, 52.055988, -2.717550, 1, 'Hereford');
 INSERT INTO devices(device_name, prediction_status, latitude, longitude, model_id, depo_location) VALUES ('RTMU 2941', 1, 52.055988, -2.717550, 2, 'Hereford');
-INSERT INTO devices(device_name, prediction_status, latitude, longitude, model_id, depo_location) VALUES ('RTMU 2941', 1, 52.055988, -2.717550, 3, 'Hereford');
-INSERT INTO devices(device_name, prediction_status, latitude, longitude, model_id, depo_location) VALUES ('RTMU 2941', 1, 52.055988, -2.717550, 4, 'Hereford');
 
 INSERT INTO devices(device_name, prediction_status, latitude, longitude, model_id, depo_location) VALUES ('RTMU 3225', 1, 51.702048, -0.708333, 1, 'Saltley');
 INSERT INTO devices(device_name, prediction_status, latitude, longitude, model_id, depo_location) VALUES ('RTMU 3225', 1, 51.702048, -0.708333, 2, 'Saltley');
-INSERT INTO devices(device_name, prediction_status, latitude, longitude, model_id, depo_location) VALUES ('RTMU 3225', 1, 51.702048, -0.708333, 3, 'Saltley');
-INSERT INTO devices(device_name, prediction_status, latitude, longitude, model_id, depo_location) VALUES ('RTMU 3225', 1, 51.702048, -0.708333, 4, 'Saltley');
 
 INSERT INTO devices(device_name, prediction_status, latitude, longitude, model_id, depo_location) VALUES ('RTMU 2757', 1, 51.519930, -0.194570, 1, 'Plumstead');
 INSERT INTO devices(device_name, prediction_status, latitude, longitude, model_id, depo_location) VALUES ('RTMU 2757', 1, 51.519930, -0.194570, 2, 'Plumstead');
-INSERT INTO devices(device_name, prediction_status, latitude, longitude, model_id, depo_location) VALUES ('RTMU 2757', 1, 51.519930, -0.194570, 3, 'Plumstead');
-INSERT INTO devices(device_name, prediction_status, latitude, longitude, model_id, depo_location) VALUES ('RTMU 2757', 1, 51.519930, -0.194570, 4, 'Plumstead');
 
 INSERT INTO devices(device_name, prediction_status, latitude, longitude, model_id, depo_location) VALUES ('RTMU 3187', 1, 51.406272, 0.386779, 1, 'High Speed Singlewell');
 INSERT INTO devices(device_name, prediction_status, latitude, longitude, model_id, depo_location) VALUES ('RTMU 3187', 1, 51.406272, 0.386779, 2, 'High Speed Singlewell');
-INSERT INTO devices(device_name, prediction_status, latitude, longitude, model_id, depo_location) VALUES ('RTMU 3187', 1, 51.406272, 0.386779, 3, 'High Speed Singlewell');
-INSERT INTO devices(device_name, prediction_status, latitude, longitude, model_id, depo_location) VALUES ('RTMU 3187', 1, 51.406272, 0.386779, 4, 'High Speed Singlewell');
 
 INSERT INTO devices(device_name, prediction_status, latitude, longitude, model_id, depo_location) VALUES ('RTMU 2915', 1, 51.538691, 0.083143, 1, 'Barking');
 INSERT INTO devices(device_name, prediction_status, latitude, longitude, model_id, depo_location) VALUES ('RTMU 2915', 1, 51.538691, 0.083143, 2, 'Barking');
-INSERT INTO devices(device_name, prediction_status, latitude, longitude, model_id, depo_location) VALUES ('RTMU 2915', 1, 51.538691, 0.083143, 3, 'Barking');
-INSERT INTO devices(device_name, prediction_status, latitude, longitude, model_id, depo_location) VALUES ('RTMU 2915', 1, 51.538691, 0.083143, 4, 'Barking');
 
 INSERT INTO devices(device_name, prediction_status, latitude, longitude, model_id, depo_location) VALUES ('RTMU 2823', 1, 51.139800, 0.879120, 1, 'Ashford');
 INSERT INTO devices(device_name, prediction_status, latitude, longitude, model_id, depo_location) VALUES ('RTMU 2823', 1, 51.139800, 0.879120, 2, 'Ashford');
-INSERT INTO devices(device_name, prediction_status, latitude, longitude, model_id, depo_location) VALUES ('RTMU 2823', 1, 51.139800, 0.879120, 3, 'Ashford');
-INSERT INTO devices(device_name, prediction_status, latitude, longitude, model_id, depo_location) VALUES ('RTMU 2823', 1, 51.139800, 0.879120, 4, 'Ashford');
